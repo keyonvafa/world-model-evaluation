@@ -61,20 +61,23 @@ The script accepts the following flags:
 * `--num-trials`: the number of trials to run (default is 100)
 
 ### Mapping sequences
-To reproduce our maps of Manhattan, first generate samples from the model by running
-```
-python generate_sequences_for_map
-```
-with the `--data` flag set to `shortest-paths`, `noisy-shortest-paths`, or `random-walks`.
 
-Put the resulting sequences into the `mapping/sequences/` folder. Then from the `mapping` folder, run `make_graphs.py` to produce the recontructed graph of Manhattan roads. The graph will be saved as a `.pkl` file in the `graphs/` folder. The script accepts the following flags:
-* `--dataset`: the name of the sequence dataset in `mapping/sequences` to run on
+The code to reproduce the maps of the world model reconstructed from sequences output by a learned model are contained in the `mapping` folder. The sequences produced by a model trained on shortest paths, noisy shortest paths, and random walks are in the `sequences` folder. These will be the sequences used for map reconstruction.
+
+Run `make_graphs.py` to produce the recontructed graph of Manhattan roads. The graph will be saved as a `.pkl` file in the `graphs/` folder. The script accepts the following flags:
+* `--dataset`: the name of the sequence dataset in `mapping/sequences/` to run on
 * `--degree`: the maximum degree of an intersection in the reconstructed graph
 * `--distance`: the maximum distance (in miles) of a new edge in the reconstructed graph
 * `--nsequences`: the number of sequences to use in the recontruction algorithm
 * `--randomerr`: if this parameter is in [0,1], the reconstruction algorithm only runs on sequences corresponnding to the true world model but chooses a random fraction (given by this parameter) to corrupt (by default this parameter is turned off)
 
-Finally, to produce the visualization of the graphs as maps of Manhattan, run the `make_maps.py` script which will create a `.html` interactive map in the `maps/` folder for each graph in the `graphs/` folder.
+To produce the visualization of the graphs as maps of Manhattan, run the `make_maps.py` script which will create a `.html` interactive map in the `maps/` folder for each graph in the `graphs/` folder.
+
+We also provide code in the base folder to reproduce sequences rather than using the ones already provided in `mapping/sequences/`. To do so, run
+```
+python generate_sequences_for_map
+```
+with the `--data` flag set to `shortest-paths`, `noisy-shortest-paths`, or `random-walks`. Put the resulting sequences into the `mapping/sequences/` folder and run the code described above from `make_graphs.py` to produce graphs and maps from these sequences.
 
 ### Detour analysis
 To analyze detours, run the following command:
