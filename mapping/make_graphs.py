@@ -13,7 +13,7 @@ def parse_args():
 
     # Add arguments
     parser.add_argument(
-        "--dataset", type=str, default="shortest-paths", help="Dataset to run on"
+        "--dataset", type=str, default="shortest", help="Dataset to run on"
     )
     parser.add_argument(
         "--degree", type=int, default=4, help="Maximum out-degree of each node"
