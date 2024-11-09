@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import GPT2Config, GPT2LMHeadModel
 from pytorch_lightning import LightningModule
+from torch.nn import functional as F
 import numpy as np
 import pickle
 
@@ -26,9 +27,9 @@ class SimpleTokenizer:
     
     def decode(self, token_ids):
         if isinstance(token_ids, torch.Tensor):
-          token_ids = token_ids.cpu().numpy()
+            token_ids = token_ids.cpu().numpy()
         if token_ids.ndim == 0:
-          token_ids = np.array([token_ids])
+            token_ids = np.array([token_ids])
         return ' '.join(self.id_to_word[id] for id in token_ids if id != self.pad_token_id)
 
 
@@ -67,7 +68,8 @@ class GPT2Model(LightningModule):
 
     def forward(self, input_ids, attention_mask=None, labels=None):
         output = self.model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-        return output.loss
+        loss = output.loss
+        return loss
 
     def training_step(self, batch, batch_idx):
         loss = self(batch['input_ids'], batch['attention_mask'], batch['labels'])
@@ -88,46 +90,39 @@ class GPT2Model(LightningModule):
         total_nodes = 0 + 1e-6
         bsz, _ = batch['input_ids'].shape
         with torch.no_grad():
-          input_ids = batch['input_ids'].to(self.model.device)
-          mask = batch['attention_mask'].to(self.model.device)
-          outputs = self.model(input_ids, attention_mask=mask, labels=input_ids)
-          logits = outputs.logits
-          top_preds = torch.argmax(logits, dim=-1)
-        
+            input_ids = batch['input_ids'].to(self.model.device)
+            mask = batch['attention_mask'].to(self.model.device)
+            outputs = self.model(input_ids, attention_mask=mask, labels=input_ids)
+            logits = outputs.logits
+            top_preds = torch.argmax(logits, dim=-1)
+          
         for i in range(bsz):
-          sequence_str = self.tokenizer.decode(batch['input_ids'][i])
-          sequence_list = sequence_str.split(" ")
-          start_node, end_node = int(sequence_list[0]), int(sequence_list[1])
-          current_state = start_node
-          for length_of_partial_sequence in range(2, len(sequence_list)):
-            top_pred = top_preds[i, length_of_partial_sequence-1]
-            top_pred_str = self.tokenizer.decode(top_pred)
-            total_nodes += 1
-            next_str = sequence_list[length_of_partial_sequence]
-            if top_pred_str in self.tokenizer.valid_turns[current_state]:
-              success_nodes += 1
-            elif top_pred_str == 'end' and current_state == end_node:
-              success_nodes += 1
-            if next_str != 'end':
-              current_state = self.tokenizer.node_and_direction_to_neighbor[(current_state, next_str)]
+            sequence_str = self.tokenizer.decode(batch['input_ids'][i])
+            sequence_list = sequence_str.split(" ")
+            start_node, end_node = int(sequence_list[0]), int(sequence_list[1])
+            current_state = start_node
+            for length_of_partial_sequence in range(2, len(sequence_list)):
+                top_pred = top_preds[i, length_of_partial_sequence-1]
+                top_pred_str = self.tokenizer.decode(top_pred)
+                total_nodes += 1
+                next_str = sequence_list[length_of_partial_sequence]
+                if top_pred_str in self.tokenizer.valid_turns[current_state]:
+                    success_nodes += 1
+                elif top_pred_str == 'end' and current_state == end_node:
+                    success_nodes += 1
+                if next_str != 'end':
+                    current_state = self.tokenizer.node_and_direction_to_neighbor[(current_state, next_str)]
 
         self.validation_step_outputs.append({'val_loss': loss, 'total_nodes': total_nodes, 'success_nodes': success_nodes})
         return loss
     
     def on_validation_epoch_end(self):
-        # print("Starting")
         avg_loss = torch.stack([x['val_loss'] for x in self.validation_step_outputs]).mean()
         total_nodes = sum([x['total_nodes'] for x in self.validation_step_outputs])
         success_nodes = sum([x['success_nodes'] for x in self.validation_step_outputs])
-        same_preds = sum([x['same_preds'] for x in self.validation_step_outputs])
-        
         success_rate = success_nodes / total_nodes
-        mean_same_preds = same_preds / total_nodes
-        
         self.log('val_loss', avg_loss, prog_bar=True, sync_dist=True)
-        self.log('success_rate', success_rate, prog_bar=True, sync_dist=True)
-        self.log('mean_same_preds', mean_same_preds, prog_bar=True, sync_dist=True)
-        
+        self.log('valid_turn_success_rate', success_rate, prog_bar=True, sync_dist=True)
         self.validation_step_outputs = []
 
 
