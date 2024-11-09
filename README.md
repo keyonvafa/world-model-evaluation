@@ -4,7 +4,7 @@ Source code for the paper ["Evaluating the World Model Implicit in a Generative 
 ### Download data and model checkpoints
 Download the data from [this link](https://drive.google.com/drive/folders/1crGsllw1Ha_6dYkswSQW9kddxmel0D4a?usp=share_link). Place the three folders (`shortest-paths`, `noisy-shortest-paths`, and `random-walks`) in a directory called `data`.
 
-Download model checkpoints from [this link](https://drive.google.com/drive/folders/14Vn1jwi5tZ3K6193-brCZnRBp6SUAcWu?usp=share_link). Place the three folders (`shortest-paths`, `noisy-shortest-paths`, and `random-walks`) in a directory called `ckpts`. Alternatively, to train the models yourself, you can use the script `train.py`.
+Download model checkpoints from [this link](https://drive.google.com/drive/folders/14Vn1jwi5tZ3K6193-brCZnRBp6SUAcWu?usp=share_link). Place the three folders (`shortest-paths`, `noisy-shortest-paths`, and `random-walks`) in a directory called `ckpts`. Alternatively, to train the models yourself, you can use the script `train.py` (default settings are for 8 A-100 GPUs).
 
 ### Installing dependencies
 To install the dependencies, run the following command:
