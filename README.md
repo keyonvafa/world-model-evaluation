@@ -1,5 +1,16 @@
 # Evaluating World Models in Transformers
-Source code for the paper ["Evaluating the World Model Implicit in a Generative Model"](https://arxiv.org/abs/2406.03689) by Keyon Vafa, Justin Y. Chen, Jon Kleinberg, Sendhil Mullainathan, Ashesh Rambachan
+Source code for the paper ["Evaluating the World Model Implicit in a Generative Model"](https://arxiv.org/abs/2406.03689) by Keyon Vafa, Justin Y. Chen, Ashesh Rambachan, Jon Kleinberg, and Sendhil Mullainathan
+
+If you find this repository useful for your research, please consider citing our work:
+
+```
+@inproceedings{vafa2024world,
+  title={Evaluating the World Model Implicit in a Generative Model},
+  author={Vafa, Keyon and Chen, Justin Y and Rambachan, Ashesh and Kleinberg, Jon and Mullainathan, Sendhil},
+  booktitle={Neural Information Processing Systems},
+  year={2024},
+}
+```
 
 ### Download data and model checkpoints
 Download the data from [this link](https://drive.google.com/drive/folders/1crGsllw1Ha_6dYkswSQW9kddxmel0D4a?usp=share_link). Place the three folders (`shortest-paths`, `noisy-shortest-paths`, and `random-walks`) in a directory called `data`.
